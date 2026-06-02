@@ -723,23 +723,27 @@
 
     function drawHeadline(ctx, headline, accent, subtitle, x, y, fontSize, subtitleSize, align = "center") {
       ctx.save();
-      ctx.textAlign = align;
       ctx.textBaseline = "top";
       ctx.font = `900 ${fontSize}px Arial, sans-serif`;
       const parts = splitAccent(headline, accent);
       const maxWidth = align === "center" ? 920 : 560;
       const fittedSize = fitTextSize(ctx, parts, fontSize, maxWidth);
       ctx.font = `900 ${fittedSize}px Arial, sans-serif`;
-      let cursor = align === "center" ? x - measureParts(ctx, parts) / 2 : x;
+      const totalWidth = measureParts(ctx, parts);
+      let cursor = align === "center" ? x - totalWidth / 2 : x;
+      const headlineY = Math.round(y);
+      ctx.textAlign = "left";
       for (const part of parts) {
         const width = ctx.measureText(part.text).width;
-        ctx.fillStyle = part.accent ? headlineGradient(ctx, cursor, y, cursor + width) : "#ffffff";
-        ctx.fillText(part.text, cursor, y);
+        const drawX = Math.round(cursor);
+        ctx.fillStyle = part.accent ? headlineGradient(ctx, drawX, headlineY, drawX + width) : "#ffffff";
+        ctx.fillText(part.text, drawX, headlineY);
         cursor += width;
       }
-      ctx.font = `800 ${subtitleSize}px Arial, sans-serif`;
-      ctx.fillStyle = "rgba(255, 255, 255, 0.54)";
-      ctx.fillText(subtitle, x, y + fittedSize + 30);
+      ctx.font = `700 ${subtitleSize}px Arial, sans-serif`;
+      ctx.fillStyle = "rgba(255, 255, 255, 0.62)";
+      ctx.textAlign = align;
+      ctx.fillText(subtitle, Math.round(x), Math.round(y + fittedSize + 30));
       ctx.restore();
     }
 
