@@ -654,8 +654,9 @@
       drawHeadline(ctx, config.headline, config.accent, config.subtitle, w / 2, 136, 76, 32);
 
       const phone = { x: 210, y: 390, w: 660, h: 1280, r: 76 };
-      const screen = drawPhoneFrame(ctx, phone);
+      const screen = drawPhoneFrame(ctx, phone, false, "modern");
       drawScreenshotInside(ctx, config.image, screen.x, screen.y, screen.w, screen.h, screen.r);
+      drawModernPhoneOverlay(ctx, phone, screen);
     }
 
     function drawTablet(ctx, config, kind) {
@@ -676,22 +677,24 @@
       drawHeadline(ctx, config.headline, config.accent, config.subtitle, 326, 128, 54, 24, "left");
 
       const phone = { x: 650, y: 58, w: 232, h: 414, r: 34 };
-      const screen = drawPhoneFrame(ctx, phone, true);
+      const screen = drawPhoneFrame(ctx, phone, true, "modern");
       drawScreenshotInside(ctx, config.image, screen.x, screen.y, screen.w, screen.h, screen.r);
+      drawModernPhoneOverlay(ctx, phone, screen, true);
       drawBottleCluster(ctx, 116, 282);
     }
 
-    function drawPhoneFrame(ctx, rect, subtle = false) {
+    function drawPhoneFrame(ctx, rect, subtle = false, variant = "classic") {
       ctx.save();
-      const bezelX = Math.max(subtle ? 10 : 24, rect.w * 0.04);
-      const bezelTop = Math.max(subtle ? 18 : 42, rect.h * 0.038);
-      const bezelBottom = Math.max(subtle ? 18 : 42, rect.h * 0.038);
+      const modern = variant === "modern";
+      const bezelX = modern ? Math.max(subtle ? 6 : 16, rect.w * 0.026) : Math.max(subtle ? 10 : 24, rect.w * 0.04);
+      const bezelTop = modern ? Math.max(subtle ? 8 : 18, rect.h * 0.016) : Math.max(subtle ? 18 : 42, rect.h * 0.038);
+      const bezelBottom = modern ? Math.max(subtle ? 10 : 22, rect.h * 0.018) : Math.max(subtle ? 18 : 42, rect.h * 0.038);
       const screen = {
         x: rect.x + bezelX,
         y: rect.y + bezelTop,
         w: rect.w - bezelX * 2,
         h: rect.h - bezelTop - bezelBottom,
-        r: Math.max(18, rect.r - bezelX * 0.9)
+        r: modern ? Math.max(18, rect.r - bezelX * 0.45) : Math.max(18, rect.r - bezelX * 0.9)
       };
 
       ctx.shadowColor = "rgba(0, 0, 0, 0.42)";
@@ -724,28 +727,59 @@
       ctx.lineWidth = subtle ? 1 : 2;
       ctx.stroke();
 
-      const speakerW = Math.max(34, rect.w * 0.16);
-      const speakerH = Math.max(4, rect.h * 0.006);
-      const speakerX = rect.x + rect.w / 2 - speakerW / 2;
-      const speakerY = rect.y + bezelTop * 0.48 - speakerH / 2;
-      roundedRect(ctx, speakerX, speakerY, speakerW, speakerH, speakerH / 2);
-      ctx.fillStyle = "rgba(137, 157, 190, 0.42)";
-      ctx.fill();
+      if (!modern) {
+        const speakerW = Math.max(34, rect.w * 0.16);
+        const speakerH = Math.max(4, rect.h * 0.006);
+        const speakerX = rect.x + rect.w / 2 - speakerW / 2;
+        const speakerY = rect.y + bezelTop * 0.48 - speakerH / 2;
+        roundedRect(ctx, speakerX, speakerY, speakerW, speakerH, speakerH / 2);
+        ctx.fillStyle = "rgba(137, 157, 190, 0.42)";
+        ctx.fill();
 
-      const cameraR = Math.max(3, rect.w * 0.012);
-      const cameraX = speakerX + speakerW + cameraR * 3;
-      const cameraY = speakerY + speakerH / 2;
-      ctx.beginPath();
-      ctx.arc(cameraX, cameraY, cameraR, 0, Math.PI * 2);
-      ctx.fillStyle = "rgba(4, 7, 18, 0.88)";
-      ctx.fill();
-      ctx.beginPath();
-      ctx.arc(cameraX - cameraR * 0.28, cameraY - cameraR * 0.28, cameraR * 0.36, 0, Math.PI * 2);
-      ctx.fillStyle = "rgba(85, 242, 214, 0.22)";
-      ctx.fill();
+        const cameraR = Math.max(3, rect.w * 0.012);
+        const cameraX = speakerX + speakerW + cameraR * 3;
+        const cameraY = speakerY + speakerH / 2;
+        ctx.beginPath();
+        ctx.arc(cameraX, cameraY, cameraR, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(4, 7, 18, 0.88)";
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(cameraX - cameraR * 0.28, cameraY - cameraR * 0.28, cameraR * 0.36, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(85, 242, 214, 0.22)";
+        ctx.fill();
+      }
 
       ctx.restore();
       return screen;
+    }
+
+    function drawModernPhoneOverlay(ctx, rect, screen, subtle = false) {
+      ctx.save();
+      const cameraR = Math.max(subtle ? 3.5 : 9, rect.w * 0.017);
+      const cameraX = rect.x + rect.w / 2;
+      const cameraY = screen.y + Math.max(subtle ? 9 : 24, rect.h * 0.022);
+
+      ctx.beginPath();
+      ctx.arc(cameraX, cameraY, cameraR + (subtle ? 1.8 : 4), 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(255, 255, 255, 0.10)";
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.arc(cameraX, cameraY, cameraR, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(2, 5, 16, 0.94)";
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.arc(cameraX - cameraR * 0.25, cameraY - cameraR * 0.25, cameraR * 0.34, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(94, 242, 184, 0.18)";
+      ctx.fill();
+
+      const homeW = Math.max(subtle ? 26 : 74, rect.w * 0.12);
+      const homeH = Math.max(subtle ? 2 : 5, rect.h * 0.004);
+      roundedRect(ctx, rect.x + rect.w / 2 - homeW / 2, screen.y + screen.h - homeH - Math.max(subtle ? 6 : 16, rect.h * 0.012), homeW, homeH, homeH / 2);
+      ctx.fillStyle = "rgba(255, 255, 255, 0.18)";
+      ctx.fill();
+      ctx.restore();
     }
 
     function drawScreenshotInside(ctx, img, x, y, w, h, r) {
