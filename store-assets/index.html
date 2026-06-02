@@ -654,8 +654,8 @@
       drawHeadline(ctx, config.headline, config.accent, config.subtitle, w / 2, 136, 76, 32);
 
       const phone = { x: 210, y: 390, w: 660, h: 1280, r: 76 };
-      drawPhoneFrame(ctx, phone);
-      drawScreenshotInside(ctx, config.image, phone.x + 34, phone.y + 58, phone.w - 68, phone.h - 116, 44);
+      const screen = drawPhoneFrame(ctx, phone);
+      drawScreenshotInside(ctx, config.image, screen.x, screen.y, screen.w, screen.h, screen.r);
     }
 
     function drawTablet(ctx, config, kind) {
@@ -666,8 +666,8 @@
       const tablet = kind === "tablet10"
         ? { x: 220, y: 420, w: 1000, h: 1840, r: 86 }
         : { x: 250, y: 480, w: 940, h: 1700, r: 82 };
-      drawPhoneFrame(ctx, tablet);
-      drawScreenshotInside(ctx, config.image, tablet.x + 48, tablet.y + 80, tablet.w - 96, tablet.h - 160, 54);
+      const screen = drawPhoneFrame(ctx, tablet);
+      drawScreenshotInside(ctx, config.image, screen.x, screen.y, screen.w, screen.h, screen.r);
     }
 
     function drawFeature(ctx, config) {
@@ -676,24 +676,76 @@
       drawHeadline(ctx, config.headline, config.accent, config.subtitle, 326, 128, 54, 24, "left");
 
       const phone = { x: 650, y: 58, w: 232, h: 414, r: 34 };
-      drawPhoneFrame(ctx, phone, true);
-      drawScreenshotInside(ctx, config.image, phone.x + 14, phone.y + 24, phone.w - 28, phone.h - 48, 22);
+      const screen = drawPhoneFrame(ctx, phone, true);
+      drawScreenshotInside(ctx, config.image, screen.x, screen.y, screen.w, screen.h, screen.r);
       drawBottleCluster(ctx, 116, 282);
     }
 
     function drawPhoneFrame(ctx, rect, subtle = false) {
       ctx.save();
+      const bezelX = Math.max(subtle ? 10 : 24, rect.w * 0.04);
+      const bezelTop = Math.max(subtle ? 18 : 42, rect.h * 0.038);
+      const bezelBottom = Math.max(subtle ? 18 : 42, rect.h * 0.038);
+      const screen = {
+        x: rect.x + bezelX,
+        y: rect.y + bezelTop,
+        w: rect.w - bezelX * 2,
+        h: rect.h - bezelTop - bezelBottom,
+        r: Math.max(18, rect.r - bezelX * 0.9)
+      };
+
       ctx.shadowColor = "rgba(0, 0, 0, 0.42)";
-      ctx.shadowBlur = subtle ? 24 : 46;
-      ctx.shadowOffsetY = subtle ? 16 : 28;
+      ctx.shadowBlur = subtle ? 26 : 54;
+      ctx.shadowOffsetY = subtle ? 16 : 32;
       roundedRect(ctx, rect.x, rect.y, rect.w, rect.h, rect.r);
-      ctx.fillStyle = subtle ? "rgba(5, 8, 27, 0.82)" : "rgba(5, 8, 27, 0.9)";
+      const body = ctx.createLinearGradient(rect.x, rect.y, rect.x + rect.w, rect.y + rect.h);
+      body.addColorStop(0, subtle ? "#090e2b" : "#070b23");
+      body.addColorStop(0.48, "#05091e");
+      body.addColorStop(1, subtle ? "#0b1730" : "#071225");
+      ctx.fillStyle = body;
       ctx.fill();
+
       ctx.shadowColor = "transparent";
-      ctx.lineWidth = subtle ? 3 : 5;
-      ctx.strokeStyle = "rgba(94, 242, 184, 0.16)";
+      ctx.lineWidth = subtle ? 2 : 4;
+      ctx.strokeStyle = "rgba(94, 242, 184, 0.18)";
       ctx.stroke();
+
+      roundedRect(ctx, rect.x + 9, rect.y + 9, rect.w - 18, rect.h - 18, Math.max(20, rect.r - 8));
+      const rim = ctx.createLinearGradient(rect.x, rect.y, rect.x + rect.w, rect.y + rect.h);
+      rim.addColorStop(0, "rgba(255, 255, 255, 0.08)");
+      rim.addColorStop(0.42, "rgba(94, 242, 184, 0.08)");
+      rim.addColorStop(1, "rgba(255, 255, 255, 0.02)");
+      ctx.strokeStyle = rim;
+      ctx.lineWidth = subtle ? 1.5 : 3;
+      ctx.stroke();
+
+      roundedRect(ctx, screen.x - 5, screen.y - 5, screen.w + 10, screen.h + 10, screen.r + 6);
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.035)";
+      ctx.lineWidth = subtle ? 1 : 2;
+      ctx.stroke();
+
+      const speakerW = Math.max(34, rect.w * 0.16);
+      const speakerH = Math.max(4, rect.h * 0.006);
+      const speakerX = rect.x + rect.w / 2 - speakerW / 2;
+      const speakerY = rect.y + bezelTop * 0.48 - speakerH / 2;
+      roundedRect(ctx, speakerX, speakerY, speakerW, speakerH, speakerH / 2);
+      ctx.fillStyle = "rgba(137, 157, 190, 0.42)";
+      ctx.fill();
+
+      const cameraR = Math.max(3, rect.w * 0.012);
+      const cameraX = speakerX + speakerW + cameraR * 3;
+      const cameraY = speakerY + speakerH / 2;
+      ctx.beginPath();
+      ctx.arc(cameraX, cameraY, cameraR, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(4, 7, 18, 0.88)";
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(cameraX - cameraR * 0.28, cameraY - cameraR * 0.28, cameraR * 0.36, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(85, 242, 214, 0.22)";
+      ctx.fill();
+
       ctx.restore();
+      return screen;
     }
 
     function drawScreenshotInside(ctx, img, x, y, w, h, r) {
