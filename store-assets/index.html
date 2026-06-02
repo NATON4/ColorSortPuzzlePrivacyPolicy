@@ -1,0 +1,882 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Google Play Assets - Color Sort: Pour & Match</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #070b1f;
+      --panel: rgba(17, 24, 55, 0.82);
+      --panel-2: rgba(26, 36, 78, 0.72);
+      --stroke: rgba(255, 255, 255, 0.14);
+      --muted: rgba(255, 255, 255, 0.62);
+      --text: #f8fbff;
+      --teal: #42e6d3;
+      --mint: #5ef2b8;
+      --cyan: #30d4ee;
+      --gold: #ffd060;
+      --danger: #ff6b8d;
+      --radius: 18px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 18% 8%, rgba(36, 175, 214, 0.22), transparent 34%),
+        radial-gradient(circle at 82% 18%, rgba(94, 242, 184, 0.13), transparent 30%),
+        linear-gradient(155deg, #08162c 0%, #080b21 42%, #06283a 100%);
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+      background-size: 72px 72px;
+      mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.75), transparent);
+    }
+
+    a { color: var(--teal); }
+
+    .shell {
+      width: min(1440px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 34px 0 56px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 24px;
+      align-items: end;
+      margin-bottom: 24px;
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: clamp(34px, 5vw, 70px);
+      line-height: 0.96;
+      letter-spacing: 0;
+    }
+
+    .accent {
+      color: transparent;
+      background: linear-gradient(100deg, var(--cyan), var(--mint));
+      -webkit-background-clip: text;
+      background-clip: text;
+    }
+
+    .hero p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 17px;
+      line-height: 1.5;
+      max-width: 760px;
+    }
+
+    .top-actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    .button {
+      appearance: none;
+      border: 1px solid rgba(94, 242, 184, 0.28);
+      color: var(--text);
+      background: rgba(94, 242, 184, 0.12);
+      border-radius: 12px;
+      padding: 10px 14px;
+      font: inherit;
+      font-weight: 750;
+      cursor: pointer;
+      transition: transform 140ms ease, background 140ms ease, border-color 140ms ease;
+    }
+
+    .button:hover {
+      background: rgba(94, 242, 184, 0.18);
+      border-color: rgba(94, 242, 184, 0.42);
+    }
+
+    .button:active { transform: scale(0.97); }
+
+    .button.secondary {
+      border-color: rgba(255, 255, 255, 0.14);
+      background: rgba(255, 255, 255, 0.08);
+      color: rgba(255, 255, 255, 0.82);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 340px;
+      gap: 22px;
+      align-items: start;
+    }
+
+    section {
+      margin-bottom: 22px;
+      padding: 22px;
+      border: 1px solid var(--stroke);
+      background: linear-gradient(180deg, rgba(22, 31, 68, 0.82), rgba(12, 19, 45, 0.74));
+      border-radius: var(--radius);
+      box-shadow: 0 22px 80px rgba(0, 0, 0, 0.32);
+      backdrop-filter: blur(16px);
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 22px;
+      letter-spacing: 0;
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .asset-card {
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.045);
+      overflow: hidden;
+    }
+
+    .preview-wrap {
+      position: relative;
+      padding: 16px;
+      background:
+        radial-gradient(circle at 26% 22%, rgba(48, 212, 238, 0.12), transparent 32%),
+        linear-gradient(160deg, rgba(5, 11, 30, 0.96), rgba(4, 24, 38, 0.96));
+    }
+
+    canvas.preview {
+      display: block;
+      width: 100%;
+      height: auto;
+      border-radius: 10px;
+      box-shadow: 0 14px 42px rgba(0, 0, 0, 0.38);
+      background: #07142a;
+    }
+
+    .card-body {
+      padding: 14px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+
+    label {
+      color: rgba(255, 255, 255, 0.58);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    input[type="text"], textarea {
+      width: 100%;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 12px;
+      background: rgba(3, 8, 24, 0.7);
+      color: var(--text);
+      padding: 10px 12px;
+      font: inherit;
+      outline: none;
+    }
+
+    textarea {
+      min-height: 92px;
+      resize: vertical;
+    }
+
+    input[type="text"]:focus, textarea:focus {
+      border-color: rgba(66, 230, 211, 0.58);
+      box-shadow: 0 0 0 3px rgba(66, 230, 211, 0.12);
+    }
+
+    input[type="file"] {
+      width: 100%;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    input[type="file"]::file-selector-button {
+      margin-right: 10px;
+      border: 1px solid rgba(66, 230, 211, 0.3);
+      border-radius: 10px;
+      background: rgba(66, 230, 211, 0.12);
+      color: var(--text);
+      padding: 8px 10px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .card-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .destination {
+      color: rgba(255, 255, 255, 0.46);
+      font-size: 12px;
+      margin-left: auto;
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 18px;
+    }
+
+    .checklist {
+      display: grid;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .check {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      color: rgba(255, 255, 255, 0.78);
+      line-height: 1.35;
+      font-size: 14px;
+    }
+
+    .check input {
+      margin-top: 2px;
+      width: 18px;
+      height: 18px;
+      accent-color: var(--mint);
+    }
+
+    .copy-card {
+      display: grid;
+      gap: 10px;
+    }
+
+    .copy-line {
+      display: grid;
+      gap: 8px;
+    }
+
+    .codebox {
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(0, 0, 0, 0.18);
+      border-radius: 12px;
+      padding: 10px 12px;
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 13px;
+      line-height: 1.35;
+      white-space: pre-wrap;
+    }
+
+    .wide {
+      grid-column: 1 / -1;
+    }
+
+    .status {
+      min-height: 18px;
+      color: var(--mint);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    @media (max-width: 1180px) {
+      .layout { grid-template-columns: 1fr; }
+      .sidebar { position: static; }
+    }
+
+    @media (max-width: 760px) {
+      .hero { grid-template-columns: 1fr; }
+      .top-actions { justify-content: flex-start; }
+      .grid { grid-template-columns: 1fr; }
+      section { padding: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="hero">
+      <div>
+        <h1>Google Play Assets<br><span class="accent">Color Sort: Pour & Match</span></h1>
+        <p>Upload raw gameplay screenshots, preview branded Play Console assets, then download final PNGs. The privacy policy remains available at <a href="../privacy-policy/">/privacy-policy/</a>.</p>
+      </div>
+      <div class="top-actions">
+        <a class="button secondary" href="../">Home</a>
+        <a class="button secondary" href="../privacy-policy/">Privacy Policy</a>
+      </div>
+    </header>
+
+    <div class="layout">
+      <div>
+        <section>
+          <div class="section-head">
+            <div>
+              <h2>Phone screenshots</h2>
+              <div class="hint">Export: 1080x1920 PNG. Upload to Play Console: Phone screenshots.</div>
+            </div>
+          </div>
+          <div class="grid" id="phoneGrid"></div>
+        </section>
+
+        <section>
+          <div class="section-head">
+            <div>
+              <h2>7-inch tablet screenshots</h2>
+              <div class="hint">Branded tablet composition using a phone screenshot. Export: 1440x2560 PNG.</div>
+            </div>
+          </div>
+          <div class="grid" id="tablet7Grid"></div>
+        </section>
+
+        <section>
+          <div class="section-head">
+            <div>
+              <h2>10-inch tablet screenshots</h2>
+              <div class="hint">Branded tablet composition using a phone screenshot. Export: 1440x2560 PNG.</div>
+            </div>
+          </div>
+          <div class="grid" id="tablet10Grid"></div>
+        </section>
+
+        <section>
+          <div class="section-head">
+            <div>
+              <h2>Feature graphic</h2>
+              <div class="hint">Export: 1024x500 PNG. Keep claims simple and policy-safe.</div>
+            </div>
+          </div>
+          <div class="grid">
+            <div class="asset-card wide" id="featureCard"></div>
+          </div>
+        </section>
+      </div>
+
+      <aside class="sidebar">
+        <section>
+          <h2>Upload checklist</h2>
+          <div class="hint">Tick these off as you upload each item to Play Console.</div>
+          <div class="checklist" id="checklist"></div>
+        </section>
+
+        <section class="copy-card">
+          <h2>Listing copy</h2>
+          <div class="copy-line">
+            <label>Store name</label>
+            <div class="codebox">Color Sort: Pour & Match</div>
+          </div>
+          <div class="copy-line">
+            <label>Short description</label>
+            <div class="codebox">Sort colors, solve bottles, relax with daily and endless puzzles.</div>
+          </div>
+          <div class="copy-line">
+            <label>Icon source</label>
+            <div class="codebox">Use play-store-icon-512.png from the Unity repo.</div>
+          </div>
+        </section>
+      </aside>
+    </div>
+  </main>
+
+  <script>
+    const STORAGE_KEY = "color-sort-play-assets-v1";
+
+    const phoneTemplates = [
+      {
+        id: "phone-sort-every-color",
+        headline: "Sort every color",
+        accent: "color",
+        subtitle: "Pour until each tube holds a single shade.",
+        filename: "phone-01-sort-every-color.png"
+      },
+      {
+        id: "phone-one-tap",
+        headline: "One tap to pour",
+        accent: "to pour",
+        subtitle: "Simple to learn. Hard to put down.",
+        filename: "phone-02-one-tap-to-pour.png"
+      },
+      {
+        id: "phone-beat-best",
+        headline: "Beat your best",
+        accent: "best",
+        subtitle: "Fewer moves, more stars, endless flow.",
+        filename: "phone-03-beat-your-best.png"
+      },
+      {
+        id: "phone-power-up",
+        headline: "Power up your puzzle",
+        accent: "puzzle",
+        subtitle: "Use hints, magic sort, and extra bottles.",
+        filename: "phone-04-power-ups.png"
+      }
+    ];
+
+    const tabletTemplates = phoneTemplates.map((template, index) => ({
+      ...template,
+      id: template.id.replace("phone", "tablet"),
+      filename: `tablet-${String(index + 1).padStart(2, "0")}-${template.filename.replace(/^phone-\d+-/, "")}`
+    }));
+
+    const checklistItems = [
+      "App icon uploaded",
+      "Feature graphic uploaded",
+      "4 phone screenshots uploaded",
+      "4 seven-inch tablet screenshots uploaded",
+      "4 ten-inch tablet screenshots uploaded",
+      "Store name copied",
+      "Short description copied",
+      "Full description copied"
+    ];
+
+    let savedState = loadState();
+    const images = new Map();
+
+    function loadState() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { fields: {}, checks: {} };
+      } catch {
+        return { fields: {}, checks: {} };
+      }
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(savedState));
+    }
+
+    function getField(id, key, fallback) {
+      return savedState.fields?.[`${id}:${key}`] ?? fallback;
+    }
+
+    function setField(id, key, value) {
+      savedState.fields = savedState.fields || {};
+      savedState.fields[`${id}:${key}`] = value;
+      saveState();
+    }
+
+    function createAssetCard(parent, config) {
+      const card = document.createElement("div");
+      card.className = config.wide ? "asset-card wide" : "asset-card";
+      card.innerHTML = `
+        <div class="preview-wrap">
+          <canvas class="preview" aria-label="${escapeHtml(config.title)} preview"></canvas>
+        </div>
+        <div class="card-body">
+          <div class="field-row">
+            <label>Headline</label>
+            <input type="text" data-field="headline">
+          </div>
+          <div class="field-row">
+            <label>Accent words</label>
+            <input type="text" data-field="accent">
+          </div>
+          <div class="field-row">
+            <label>Subtitle</label>
+            <input type="text" data-field="subtitle">
+          </div>
+          <div class="field-row">
+            <label>Screenshot</label>
+            <input type="file" accept="image/png,image/jpeg,image/webp">
+          </div>
+          <div class="card-actions">
+            <button class="button" type="button" data-action="download">Download PNG</button>
+            <button class="button secondary" type="button" data-action="reset">Reset</button>
+            <span class="destination">${escapeHtml(config.destination)}</span>
+          </div>
+          <div class="status"></div>
+        </div>
+      `;
+
+      const canvas = card.querySelector("canvas");
+      const headlineInput = card.querySelector('[data-field="headline"]');
+      const accentInput = card.querySelector('[data-field="accent"]');
+      const subtitleInput = card.querySelector('[data-field="subtitle"]');
+      const fileInput = card.querySelector('input[type="file"]');
+      const status = card.querySelector(".status");
+
+      headlineInput.value = getField(config.id, "headline", config.headline);
+      accentInput.value = getField(config.id, "accent", config.accent);
+      subtitleInput.value = getField(config.id, "subtitle", config.subtitle);
+
+      const redraw = () => {
+        const next = {
+          ...config,
+          headline: headlineInput.value.trim() || config.headline,
+          accent: accentInput.value.trim(),
+          subtitle: subtitleInput.value.trim() || config.subtitle,
+          image: images.get(config.id)
+        };
+        renderAsset(canvas, next, config.kind);
+      };
+
+      [headlineInput, accentInput, subtitleInput].forEach(input => {
+        input.addEventListener("input", () => {
+          setField(config.id, input.dataset.field, input.value);
+          redraw();
+        });
+      });
+
+      fileInput.addEventListener("change", () => {
+        const file = fileInput.files?.[0];
+        if (!file) return;
+        const img = new Image();
+        img.onload = () => {
+          URL.revokeObjectURL(img.src);
+          images.set(config.id, img);
+          status.textContent = `${file.name} loaded`;
+          redraw();
+        };
+        img.src = URL.createObjectURL(file);
+      });
+
+      card.querySelector('[data-action="download"]').addEventListener("click", () => {
+        const exportCanvas = document.createElement("canvas");
+        renderAsset(exportCanvas, {
+          ...config,
+          headline: headlineInput.value.trim() || config.headline,
+          accent: accentInput.value.trim(),
+          subtitle: subtitleInput.value.trim() || config.subtitle,
+          image: images.get(config.id)
+        }, config.kind, true);
+        downloadCanvas(exportCanvas, config.filename);
+        status.textContent = `${config.filename} downloaded`;
+      });
+
+      card.querySelector('[data-action="reset"]').addEventListener("click", () => {
+        headlineInput.value = config.headline;
+        accentInput.value = config.accent;
+        subtitleInput.value = config.subtitle;
+        fileInput.value = "";
+        images.delete(config.id);
+        setField(config.id, "headline", config.headline);
+        setField(config.id, "accent", config.accent);
+        setField(config.id, "subtitle", config.subtitle);
+        status.textContent = "Reset";
+        redraw();
+      });
+
+      parent.appendChild(card);
+      redraw();
+    }
+
+    function createFeatureCard() {
+      const config = {
+        id: "feature-graphic",
+        kind: "feature",
+        title: "Feature graphic",
+        destination: "Upload to Feature graphic",
+        headline: "Color Sort: Pour & Match",
+        accent: "Pour & Match",
+        subtitle: "Relaxing liquid puzzle",
+        filename: "feature-graphic-color-sort-pour-match.png",
+        wide: true
+      };
+      createAssetCard(document.querySelector("#featureCard").parentElement, config);
+      document.querySelector("#featureCard").remove();
+    }
+
+    function renderAsset(canvas, config, kind, fullSize = false) {
+      const size = getSize(kind, fullSize);
+      canvas.width = size.w;
+      canvas.height = size.h;
+      const ctx = canvas.getContext("2d");
+      const scale = size.w / getSize(kind, true).w;
+      ctx.save();
+      ctx.scale(scale, scale);
+      if (kind === "feature") drawFeature(ctx, config);
+      else if (kind === "tablet7" || kind === "tablet10") drawTablet(ctx, config, kind);
+      else drawPhone(ctx, config);
+      ctx.restore();
+    }
+
+    function getSize(kind, fullSize) {
+      const full = kind === "feature" ? { w: 1024, h: 500 } : kind === "phone" ? { w: 1080, h: 1920 } : { w: 1440, h: 2560 };
+      if (fullSize) return full;
+      const previewW = kind === "feature" ? 720 : 360;
+      return { w: previewW, h: Math.round(previewW * full.h / full.w) };
+    }
+
+    function drawBackground(ctx, w, h) {
+      const base = ctx.createLinearGradient(0, 0, w, h);
+      base.addColorStop(0, "#0a1732");
+      base.addColorStop(0.42, "#0b0e2a");
+      base.addColorStop(1, "#06394a");
+      ctx.fillStyle = base;
+      ctx.fillRect(0, 0, w, h);
+
+      drawGlow(ctx, w * 0.15, h * 0.1, w * 0.55, "rgba(43, 176, 224, 0.16)");
+      drawGlow(ctx, w * 0.86, h * 0.32, w * 0.5, "rgba(94, 242, 184, 0.12)");
+      drawGlow(ctx, w * 0.5, h * 0.88, w * 0.55, "rgba(8, 111, 129, 0.24)");
+    }
+
+    function drawGlow(ctx, x, y, r, color) {
+      const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+      g.addColorStop(0, color);
+      g.addColorStop(1, "rgba(0, 0, 0, 0)");
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function drawPhone(ctx, config) {
+      const w = 1080, h = 1920;
+      drawBackground(ctx, w, h);
+      drawHeadline(ctx, config.headline, config.accent, config.subtitle, w / 2, 136, 76, 32);
+
+      const phone = { x: 210, y: 390, w: 660, h: 1280, r: 76 };
+      drawPhoneFrame(ctx, phone);
+      drawScreenshotInside(ctx, config.image, phone.x + 34, phone.y + 58, phone.w - 68, phone.h - 116, 44);
+    }
+
+    function drawTablet(ctx, config, kind) {
+      const w = 1440, h = 2560;
+      drawBackground(ctx, w, h);
+      drawHeadline(ctx, config.headline, config.accent, config.subtitle, w / 2, 168, 112, 44);
+
+      const tablet = kind === "tablet10"
+        ? { x: 220, y: 420, w: 1000, h: 1840, r: 86 }
+        : { x: 250, y: 480, w: 940, h: 1700, r: 82 };
+      drawPhoneFrame(ctx, tablet);
+      drawScreenshotInside(ctx, config.image, tablet.x + 48, tablet.y + 80, tablet.w - 96, tablet.h - 160, 54);
+    }
+
+    function drawFeature(ctx, config) {
+      const w = 1024, h = 500;
+      drawBackground(ctx, w, h);
+      drawHeadline(ctx, config.headline, config.accent, config.subtitle, 326, 128, 54, 24, "left");
+
+      const phone = { x: 650, y: 58, w: 232, h: 414, r: 34 };
+      drawPhoneFrame(ctx, phone, true);
+      drawScreenshotInside(ctx, config.image, phone.x + 14, phone.y + 24, phone.w - 28, phone.h - 48, 22);
+      drawBottleCluster(ctx, 116, 282);
+    }
+
+    function drawPhoneFrame(ctx, rect, subtle = false) {
+      ctx.save();
+      ctx.shadowColor = "rgba(0, 0, 0, 0.42)";
+      ctx.shadowBlur = subtle ? 24 : 46;
+      ctx.shadowOffsetY = subtle ? 16 : 28;
+      roundedRect(ctx, rect.x, rect.y, rect.w, rect.h, rect.r);
+      ctx.fillStyle = subtle ? "rgba(5, 8, 27, 0.82)" : "rgba(5, 8, 27, 0.9)";
+      ctx.fill();
+      ctx.shadowColor = "transparent";
+      ctx.lineWidth = subtle ? 3 : 5;
+      ctx.strokeStyle = "rgba(94, 242, 184, 0.16)";
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawScreenshotInside(ctx, img, x, y, w, h, r) {
+      ctx.save();
+      roundedRect(ctx, x, y, w, h, r);
+      ctx.clip();
+      if (img) {
+        drawCover(ctx, img, x, y, w, h);
+        const dim = ctx.createLinearGradient(0, y, 0, y + h);
+        dim.addColorStop(0, "rgba(3, 7, 24, 0.08)");
+        dim.addColorStop(1, "rgba(3, 7, 24, 0.18)");
+        ctx.fillStyle = dim;
+        ctx.fillRect(x, y, w, h);
+      } else {
+        const bg = ctx.createLinearGradient(x, y, x + w, y + h);
+        bg.addColorStop(0, "#111a3e");
+        bg.addColorStop(1, "#0b5366");
+        ctx.fillStyle = bg;
+        ctx.fillRect(x, y, w, h);
+        ctx.fillStyle = "rgba(255, 255, 255, 0.72)";
+        ctx.font = "800 24px Inter, system-ui, sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("Upload gameplay screenshot", x + w / 2, y + h / 2);
+      }
+      ctx.restore();
+    }
+
+    function drawHeadline(ctx, headline, accent, subtitle, x, y, fontSize, subtitleSize, align = "center") {
+      ctx.save();
+      ctx.textAlign = align;
+      ctx.textBaseline = "top";
+      ctx.font = `900 ${fontSize}px Inter, Arial, sans-serif`;
+      const parts = splitAccent(headline, accent);
+      let cursor = align === "center" ? x - measureParts(ctx, parts) / 2 : x;
+      for (const part of parts) {
+        const width = ctx.measureText(part.text).width;
+        ctx.fillStyle = part.accent ? headlineGradient(ctx, cursor, y, cursor + width) : "#ffffff";
+        ctx.fillText(part.text, cursor, y);
+        cursor += width;
+      }
+      ctx.font = `800 ${subtitleSize}px Inter, Arial, sans-serif`;
+      ctx.fillStyle = "rgba(255, 255, 255, 0.54)";
+      ctx.fillText(subtitle, x, y + fontSize + 30);
+      ctx.restore();
+    }
+
+    function splitAccent(headline, accent) {
+      if (!accent || !headline.toLowerCase().includes(accent.toLowerCase())) return [{ text: headline, accent: false }];
+      const start = headline.toLowerCase().indexOf(accent.toLowerCase());
+      return [
+        { text: headline.slice(0, start), accent: false },
+        { text: headline.slice(start, start + accent.length), accent: true },
+        { text: headline.slice(start + accent.length), accent: false }
+      ].filter(part => part.text.length > 0);
+    }
+
+    function measureParts(ctx, parts) {
+      return parts.reduce((sum, part) => sum + ctx.measureText(part.text).width, 0);
+    }
+
+    function headlineGradient(ctx, x1, y1, x2) {
+      const g = ctx.createLinearGradient(x1, y1, x2, y1);
+      g.addColorStop(0, "#30d4ee");
+      g.addColorStop(1, "#5ef2b8");
+      return g;
+    }
+
+    function drawCover(ctx, img, x, y, w, h) {
+      const imageRatio = img.width / img.height;
+      const boxRatio = w / h;
+      let sw = img.width, sh = img.height, sx = 0, sy = 0;
+      if (imageRatio > boxRatio) {
+        sw = img.height * boxRatio;
+        sx = (img.width - sw) / 2;
+      } else {
+        sh = img.width / boxRatio;
+        sy = (img.height - sh) / 2;
+      }
+      ctx.drawImage(img, sx, sy, sw, sh, x, y, w, h);
+    }
+
+    function drawBottleCluster(ctx, x, y) {
+      const colors = ["#ffd060", "#ff6b8d", "#30d4ee", "#5ef2b8"];
+      for (let i = 0; i < 4; i++) {
+        drawBottle(ctx, x + i * 56, y + (i % 2) * 22, colors[i], colors[(i + 1) % colors.length]);
+      }
+    }
+
+    function drawBottle(ctx, x, y, c1, c2) {
+      ctx.save();
+      ctx.shadowColor = "rgba(48, 212, 238, 0.22)";
+      ctx.shadowBlur = 18;
+      roundedRect(ctx, x, y, 38, 92, 18);
+      ctx.fillStyle = "rgba(255, 255, 255, 0.08)";
+      ctx.fill();
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.35)";
+      ctx.stroke();
+      roundedRect(ctx, x + 5, y + 42, 28, 44, 14);
+      const fill = ctx.createLinearGradient(0, y + 42, 0, y + 86);
+      fill.addColorStop(0, c1);
+      fill.addColorStop(1, c2);
+      ctx.fillStyle = fill;
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function roundedRect(ctx, x, y, w, h, r) {
+      const radius = Math.min(r, w / 2, h / 2);
+      ctx.beginPath();
+      ctx.moveTo(x + radius, y);
+      ctx.arcTo(x + w, y, x + w, y + h, radius);
+      ctx.arcTo(x + w, y + h, x, y + h, radius);
+      ctx.arcTo(x, y + h, x, y, radius);
+      ctx.arcTo(x, y, x + w, y, radius);
+      ctx.closePath();
+    }
+
+    function downloadCanvas(canvas, filename) {
+      const link = document.createElement("a");
+      link.download = filename;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+    }
+
+    function createChecklist() {
+      const root = document.querySelector("#checklist");
+      checklistItems.forEach((label, index) => {
+        const id = `check-${index}`;
+        const item = document.createElement("label");
+        item.className = "check";
+        item.innerHTML = `<input type="checkbox"><span>${escapeHtml(label)}</span>`;
+        const input = item.querySelector("input");
+        input.checked = Boolean(savedState.checks?.[id]);
+        input.addEventListener("change", () => {
+          savedState.checks = savedState.checks || {};
+          savedState.checks[id] = input.checked;
+          saveState();
+        });
+        root.appendChild(item);
+      });
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;");
+    }
+
+    function init() {
+      phoneTemplates.forEach(template => createAssetCard(document.querySelector("#phoneGrid"), {
+        ...template,
+        kind: "phone",
+        title: template.headline,
+        destination: "Upload to Phone screenshots"
+      }));
+      tabletTemplates.forEach(template => createAssetCard(document.querySelector("#tablet7Grid"), {
+        ...template,
+        id: template.id.replace("tablet", "tablet7"),
+        kind: "tablet7",
+        title: template.headline,
+        destination: "Upload to 7-inch tablet screenshots",
+        filename: template.filename.replace("tablet", "tablet-7in")
+      }));
+      tabletTemplates.forEach(template => createAssetCard(document.querySelector("#tablet10Grid"), {
+        ...template,
+        id: template.id.replace("tablet", "tablet10"),
+        kind: "tablet10",
+        title: template.headline,
+        destination: "Upload to 10-inch tablet screenshots",
+        filename: template.filename.replace("tablet", "tablet-10in")
+      }));
+      createFeatureCard();
+      createChecklist();
+    }
+
+    init();
+  </script>
+</body>
+</html>
