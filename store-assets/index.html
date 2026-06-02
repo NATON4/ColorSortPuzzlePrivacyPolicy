@@ -179,6 +179,7 @@
       display: block;
       width: 100%;
       height: auto;
+      image-rendering: auto;
       border-radius: 10px;
       box-shadow: 0 14px 42px rgba(0, 0, 0, 0.38);
       background: #07142a;
@@ -608,25 +609,20 @@
       document.querySelector("#featureCard").remove();
     }
 
-    function renderAsset(canvas, config, kind, fullSize = false) {
-      const size = getSize(kind, fullSize);
+    function renderAsset(canvas, config, kind) {
+      const size = getSize(kind);
       canvas.width = size.w;
       canvas.height = size.h;
       const ctx = canvas.getContext("2d");
-      const scale = size.w / getSize(kind, true).w;
-      ctx.save();
-      ctx.scale(scale, scale);
       if (kind === "feature") drawFeature(ctx, config);
       else if (kind === "tablet7" || kind === "tablet10") drawTablet(ctx, config, kind);
       else drawPhone(ctx, config);
-      ctx.restore();
     }
 
-    function getSize(kind, fullSize) {
-      const full = kind === "feature" ? { w: 1024, h: 500 } : kind === "phone" ? { w: 1080, h: 1920 } : { w: 1440, h: 2560 };
-      if (fullSize) return full;
-      const previewW = kind === "feature" ? 720 : 360;
-      return { w: previewW, h: Math.round(previewW * full.h / full.w) };
+    function getSize(kind) {
+      if (kind === "feature") return { w: 1024, h: 500 };
+      if (kind === "phone") return { w: 1080, h: 1920 };
+      return { w: 1440, h: 2560 };
     }
 
     function drawBackground(ctx, w, h) {
@@ -729,8 +725,11 @@
       ctx.save();
       ctx.textAlign = align;
       ctx.textBaseline = "top";
-      ctx.font = `900 ${fontSize}px Inter, Arial, sans-serif`;
+      ctx.font = `900 ${fontSize}px Arial, sans-serif`;
       const parts = splitAccent(headline, accent);
+      const maxWidth = align === "center" ? 920 : 560;
+      const fittedSize = fitTextSize(ctx, parts, fontSize, maxWidth);
+      ctx.font = `900 ${fittedSize}px Arial, sans-serif`;
       let cursor = align === "center" ? x - measureParts(ctx, parts) / 2 : x;
       for (const part of parts) {
         const width = ctx.measureText(part.text).width;
@@ -738,24 +737,38 @@
         ctx.fillText(part.text, cursor, y);
         cursor += width;
       }
-      ctx.font = `800 ${subtitleSize}px Inter, Arial, sans-serif`;
+      ctx.font = `800 ${subtitleSize}px Arial, sans-serif`;
       ctx.fillStyle = "rgba(255, 255, 255, 0.54)";
-      ctx.fillText(subtitle, x, y + fontSize + 30);
+      ctx.fillText(subtitle, x, y + fittedSize + 30);
       ctx.restore();
     }
 
     function splitAccent(headline, accent) {
-      if (!accent || !headline.toLowerCase().includes(accent.toLowerCase())) return [{ text: headline, accent: false }];
-      const start = headline.toLowerCase().indexOf(accent.toLowerCase());
+      const cleanHeadline = headline.replace(/\s+/g, " ").trim();
+      const cleanAccent = accent.replace(/\s+/g, " ").trim();
+      if (!cleanAccent || !cleanHeadline.toLowerCase().includes(cleanAccent.toLowerCase())) {
+        return [{ text: cleanHeadline, accent: false }];
+      }
+      const start = cleanHeadline.toLowerCase().indexOf(cleanAccent.toLowerCase());
       return [
-        { text: headline.slice(0, start), accent: false },
-        { text: headline.slice(start, start + accent.length), accent: true },
-        { text: headline.slice(start + accent.length), accent: false }
+        { text: cleanHeadline.slice(0, start).replace(/\s+$/, " "), accent: false },
+        { text: cleanHeadline.slice(start, start + cleanAccent.length), accent: true },
+        { text: cleanHeadline.slice(start + cleanAccent.length).replace(/^\s+/, " "), accent: false }
       ].filter(part => part.text.length > 0);
     }
 
     function measureParts(ctx, parts) {
       return parts.reduce((sum, part) => sum + ctx.measureText(part.text).width, 0);
+    }
+
+    function fitTextSize(ctx, parts, initialSize, maxWidth) {
+      let size = initialSize;
+      while (size > 34) {
+        ctx.font = `900 ${size}px Arial, sans-serif`;
+        if (measureParts(ctx, parts) <= maxWidth) break;
+        size -= 2;
+      }
+      return size;
     }
 
     function headlineGradient(ctx, x1, y1, x2) {
