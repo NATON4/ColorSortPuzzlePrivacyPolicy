@@ -660,7 +660,7 @@
         accent: "Pour & Match",
         subtitle: "Relaxing liquid puzzle",
         filename: "feature-graphic-color-sort-pour-match.png",
-        defaultImage: "default-screenshots/source-05.png",
+        defaultImage: "default-screenshots/source-04.png",
         wide: true
       };
       createAssetCard(document.querySelector("#featureCard").parentElement, config);
@@ -756,11 +756,11 @@
       ctx.fillText(config.subtitle || "Relaxing liquid puzzle", 82, 244);
 
       drawFeatureBadge(ctx, 82, 300, "One-tap pours");
-      drawFeatureBadge(ctx, 252, 300, "Daily + Endless");
-      drawBottleCluster(ctx, 92, 372);
+      drawFeatureBadge(ctx, 252, 300, "Daily Challenge");
+      drawFeatureBadge(ctx, 454, 300, "Endless Mode");
       ctx.restore();
 
-      const phone = { x: 650, y: 38, w: 252, h: 456, r: 38 };
+      const phone = { x: 642, y: 36, w: 264, h: 460, r: 38 };
       const screen = drawPhoneFrame(ctx, phone, true, "modern");
       drawScreenshotInside(ctx, config.image, screen.x, screen.y, screen.w, screen.h, screen.r, "contain");
       drawModernPhoneOverlay(ctx, phone, screen, true);
@@ -770,7 +770,7 @@
       ctx.save();
       ctx.shadowColor = "rgba(94, 242, 184, 0.16)";
       ctx.shadowBlur = 16;
-      roundedRect(ctx, x, y, 142, 42, 21);
+      roundedRect(ctx, x, y, 172, 42, 21);
       ctx.fillStyle = "rgba(94, 242, 184, 0.12)";
       ctx.fill();
       ctx.shadowColor = "transparent";
@@ -781,7 +781,7 @@
       ctx.fillStyle = "rgba(255, 255, 255, 0.78)";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-      ctx.fillText(text, x + 71, y + 21);
+      ctx.fillText(text, x + 86, y + 21);
       ctx.restore();
     }
 
