@@ -660,6 +660,7 @@
         accent: "Pour & Match",
         subtitle: "Relaxing liquid puzzle",
         filename: "feature-graphic-color-sort-pour-match.png",
+        defaultImage: "default-screenshots/source-05.png",
         wide: true
       };
       createAssetCard(document.querySelector("#featureCard").parentElement, config);
@@ -731,13 +732,57 @@
     function drawFeature(ctx, config) {
       const w = 1024, h = 500;
       drawBackground(ctx, w, h);
-      drawHeadline(ctx, config.headline, config.accent, config.subtitle, 326, 128, 54, 24, "left");
 
-      const phone = { x: 650, y: 58, w: 232, h: 414, r: 34 };
+      ctx.save();
+      const panel = ctx.createLinearGradient(0, 0, w, h);
+      panel.addColorStop(0, "rgba(10, 23, 50, 0.18)");
+      panel.addColorStop(0.52, "rgba(8, 12, 38, 0.36)");
+      panel.addColorStop(1, "rgba(6, 57, 74, 0.30)");
+      ctx.fillStyle = panel;
+      ctx.fillRect(0, 0, w, h);
+      drawGlow(ctx, 760, 240, 310, "rgba(94, 242, 184, 0.12)");
+      drawGlow(ctx, 150, 420, 240, "rgba(48, 212, 238, 0.16)");
+
+      ctx.textBaseline = "top";
+      ctx.textAlign = "left";
+      ctx.font = "900 62px Arial, sans-serif";
+      ctx.fillStyle = "#ffffff";
+      ctx.fillText("Color Sort:", 78, 82);
+      ctx.fillStyle = headlineGradient(ctx, 78, 154, 420);
+      ctx.fillText("Pour & Match", 78, 154);
+
+      ctx.font = "800 26px Arial, sans-serif";
+      ctx.fillStyle = "rgba(255, 255, 255, 0.66)";
+      ctx.fillText(config.subtitle || "Relaxing liquid puzzle", 82, 244);
+
+      drawFeatureBadge(ctx, 82, 300, "One-tap pours");
+      drawFeatureBadge(ctx, 252, 300, "Daily + Endless");
+      drawBottleCluster(ctx, 92, 372);
+      ctx.restore();
+
+      const phone = { x: 650, y: 38, w: 252, h: 456, r: 38 };
       const screen = drawPhoneFrame(ctx, phone, true, "modern");
-      drawScreenshotInside(ctx, config.image, screen.x, screen.y, screen.w, screen.h, screen.r);
+      drawScreenshotInside(ctx, config.image, screen.x, screen.y, screen.w, screen.h, screen.r, "contain");
       drawModernPhoneOverlay(ctx, phone, screen, true);
-      drawBottleCluster(ctx, 116, 282);
+    }
+
+    function drawFeatureBadge(ctx, x, y, text) {
+      ctx.save();
+      ctx.shadowColor = "rgba(94, 242, 184, 0.16)";
+      ctx.shadowBlur = 16;
+      roundedRect(ctx, x, y, 142, 42, 21);
+      ctx.fillStyle = "rgba(94, 242, 184, 0.12)";
+      ctx.fill();
+      ctx.shadowColor = "transparent";
+      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = "rgba(94, 242, 184, 0.30)";
+      ctx.stroke();
+      ctx.font = "800 15px Arial, sans-serif";
+      ctx.fillStyle = "rgba(255, 255, 255, 0.78)";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(text, x + 71, y + 21);
+      ctx.restore();
     }
 
     function drawPhoneFrame(ctx, rect, subtle = false, variant = "classic") {
