@@ -672,6 +672,8 @@
       canvas.width = size.w;
       canvas.height = size.h;
       const ctx = canvas.getContext("2d");
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = "high";
       if (kind === "feature") drawFeature(ctx, config);
       else if (kind === "tablet7" || kind === "tablet10") drawTablet(ctx, config, kind);
       else drawPhone(ctx, config);
@@ -755,12 +757,12 @@
       ctx.fillStyle = "rgba(255, 255, 255, 0.66)";
       ctx.fillText(config.subtitle || "Relaxing liquid puzzle", 82, 244);
 
-      drawFeatureBadge(ctx, 82, 300, "One-tap pours");
-      drawFeatureBadge(ctx, 252, 300, "Daily Challenge");
-      drawFeatureBadge(ctx, 454, 300, "Endless Mode");
+      drawFeatureBadge(ctx, 82, 304, "One-tap pours");
+      drawFeatureBadge(ctx, 270, 304, "Daily Challenge");
+      drawFeatureBadge(ctx, 458, 304, "Endless Mode");
       ctx.restore();
 
-      const phone = { x: 642, y: 36, w: 264, h: 460, r: 38 };
+      const phone = { x: 654, y: 16, w: 300, h: 480, r: 38 };
       const screen = drawPhoneFrame(ctx, phone, true, "modern");
       drawScreenshotInside(ctx, config.image, screen.x, screen.y, screen.w, screen.h, screen.r, "contain");
       drawModernPhoneOverlay(ctx, phone, screen, true);
@@ -768,20 +770,20 @@
 
     function drawFeatureBadge(ctx, x, y, text) {
       ctx.save();
-      ctx.shadowColor = "rgba(94, 242, 184, 0.16)";
-      ctx.shadowBlur = 16;
-      roundedRect(ctx, x, y, 172, 42, 21);
+      ctx.shadowColor = "rgba(94, 242, 184, 0.12)";
+      ctx.shadowBlur = 12;
+      roundedRect(ctx, x, y, 164, 42, 21);
       ctx.fillStyle = "rgba(94, 242, 184, 0.12)";
       ctx.fill();
       ctx.shadowColor = "transparent";
       ctx.lineWidth = 1.5;
       ctx.strokeStyle = "rgba(94, 242, 184, 0.30)";
       ctx.stroke();
-      ctx.font = "800 15px Arial, sans-serif";
+      ctx.font = "800 14px Arial, sans-serif";
       ctx.fillStyle = "rgba(255, 255, 255, 0.78)";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-      ctx.fillText(text, x + 86, y + 21);
+      ctx.fillText(text, x + 82, y + 21);
       ctx.restore();
     }
 
