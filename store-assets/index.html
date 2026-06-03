@@ -710,9 +710,9 @@
       drawBackground(ctx, w, h);
       drawHeadline(ctx, config.headline, config.accent, config.subtitle, w / 2, 136, 76, 32);
 
-      const phone = { x: 210, y: 390, w: 660, h: 1280, r: 76 };
+      const phone = { x: 172, y: 390, w: 736, h: 1280, r: 76 };
       const screen = drawPhoneFrame(ctx, phone, false, "modern");
-      drawScreenshotInside(ctx, config.image, screen.x, screen.y, screen.w, screen.h, screen.r);
+      drawScreenshotInside(ctx, config.image, screen.x, screen.y, screen.w, screen.h, screen.r, "contain");
       drawModernPhoneOverlay(ctx, phone, screen);
     }
 
@@ -839,12 +839,13 @@
       ctx.restore();
     }
 
-    function drawScreenshotInside(ctx, img, x, y, w, h, r) {
+    function drawScreenshotInside(ctx, img, x, y, w, h, r, fit = "cover") {
       ctx.save();
       roundedRect(ctx, x, y, w, h, r);
       ctx.clip();
       if (img) {
-        drawCover(ctx, img, x, y, w, h);
+        if (fit === "contain") drawContain(ctx, img, x, y, w, h);
+        else drawCover(ctx, img, x, y, w, h);
         const dim = ctx.createLinearGradient(0, y, 0, y + h);
         dim.addColorStop(0, "rgba(3, 7, 24, 0.08)");
         dim.addColorStop(1, "rgba(3, 7, 24, 0.18)");
@@ -937,6 +938,26 @@
         sy = (img.height - sh) / 2;
       }
       ctx.drawImage(img, sx, sy, sw, sh, x, y, w, h);
+    }
+
+    function drawContain(ctx, img, x, y, w, h) {
+      const imageRatio = img.width / img.height;
+      const boxRatio = w / h;
+      let dw = w, dh = h, dx = x, dy = y;
+      if (imageRatio > boxRatio) {
+        dh = w / imageRatio;
+        dy = y + (h - dh) / 2;
+      } else {
+        dw = h * imageRatio;
+        dx = x + (w - dw) / 2;
+      }
+
+      const bg = ctx.createLinearGradient(x, y, x + w, y + h);
+      bg.addColorStop(0, "#071225");
+      bg.addColorStop(1, "#083f50");
+      ctx.fillStyle = bg;
+      ctx.fillRect(x, y, w, h);
+      ctx.drawImage(img, dx, dy, dw, dh);
     }
 
     function drawBottleCluster(ctx, x, y) {
