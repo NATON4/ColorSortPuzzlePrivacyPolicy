@@ -758,13 +758,13 @@
       ctx.fillText(config.subtitle || "Relaxing liquid puzzle", 82, 244);
 
       drawFeatureBadge(ctx, 82, 304, "One-tap pours");
-      drawFeatureBadge(ctx, 270, 304, "Daily Challenge");
-      drawFeatureBadge(ctx, 458, 304, "Endless Mode");
+      drawFeatureBadge(ctx, 282, 304, "Daily Challenge");
+      drawFeatureBadge(ctx, 182, 360, "Endless Mode");
       ctx.restore();
 
-      const phone = { x: 654, y: 16, w: 300, h: 480, r: 38 };
+      const phone = { x: 690, y: 16, w: 272, h: 480, r: 38 };
       const screen = drawPhoneFrame(ctx, phone, true, "modern");
-      drawScreenshotInside(ctx, config.image, screen.x, screen.y, screen.w, screen.h, screen.r, "contain");
+      drawScreenshotInside(ctx, config.image, screen.x, screen.y, screen.w, screen.h, screen.r, "cover");
       drawModernPhoneOverlay(ctx, phone, screen, true);
     }
 
@@ -772,7 +772,7 @@
       ctx.save();
       ctx.shadowColor = "rgba(94, 242, 184, 0.12)";
       ctx.shadowBlur = 12;
-      roundedRect(ctx, x, y, 164, 42, 21);
+      roundedRect(ctx, x, y, 176, 42, 21);
       ctx.fillStyle = "rgba(94, 242, 184, 0.12)";
       ctx.fill();
       ctx.shadowColor = "transparent";
@@ -783,7 +783,7 @@
       ctx.fillStyle = "rgba(255, 255, 255, 0.78)";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-      ctx.fillText(text, x + 82, y + 21);
+      ctx.fillText(text, x + 88, y + 21);
       ctx.restore();
     }
 
